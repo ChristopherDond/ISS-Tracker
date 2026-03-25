@@ -16,6 +16,9 @@ const elements = {
   refresh: document.getElementById("refresh"),
   trail: document.getElementById("trail"),
   atmosphere: document.getElementById("atmosphere"),
+  cursorMain: document.getElementById("cursor-main"),
+  cursorTrail: document.querySelector(".cursor-trail"),
+  dotsGrid: document.querySelector(".dots-grid"),
 };
 
 const globeContainer = document.getElementById("globe");
@@ -249,9 +252,54 @@ function initStarfield() {
   globe.scene().add(stars);
 }
 
+function setupCursor() {
+  if (!elements.cursorMain || !elements.cursorTrail) return;
+
+  document.body.style.cursor = "none";
+  document.addEventListener("mousemove", (event) => {
+    const x = `${event.clientX}px`;
+    const y = `${event.clientY}px`;
+    elements.cursorMain.style.left = x;
+    elements.cursorMain.style.top = y;
+    elements.cursorTrail.style.left = x;
+    elements.cursorTrail.style.top = y;
+
+    if (elements.dotsGrid) {
+      elements.dotsGrid.style.setProperty("--mx", `${event.clientX}px`);
+      elements.dotsGrid.style.setProperty("--my", `${event.clientY}px`);
+    }
+
+    document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
+    document.documentElement.style.setProperty("--mouse-y", `${event.clientY}px`);
+  });
+}
+
+function setupReveal() {
+  const targets = document.querySelectorAll(".scroll-reveal");
+  if (!targets.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add("is-visible");
+          }, index * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  targets.forEach((target) => observer.observe(target));
+}
+
 function init() {
   initStarfield();
   setupControls();
+  setupCursor();
+  setupReveal();
   updateAll();
   setInterval(updateAll, 5000);
 

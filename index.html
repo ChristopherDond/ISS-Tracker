@@ -3,11 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Rastreador ISS • Tempo Real</title>
+    <title>ISS Tracker • Tempo Real</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@500;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600&f[]=clash-display@500,600,700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -22,71 +26,77 @@
       <div class="brand">
         <span class="logo">ISS</span>
         <div>
-          <h1>Rastreador da Estacao Espacial</h1>
-          <p>Posicao, velocidade e proximas passagens visiveis.</p>
+          <h1 data-i18n="title">ISS Tracker</h1>
+          <p data-i18n="subtitle">Telemetria orbital, trilhas visuais e passagens em tempo real.</p>
         </div>
       </div>
-      <div class="status pill" id="status">Conectando aos satelites...</div>
+      <div class="topbar-right">
+        <div class="lang-toggle" aria-label="Idioma">
+          <button class="lang-btn is-active" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+        <div class="status pill" id="status" data-i18n="statusConnecting">Conectando aos satelites...</div>
+      </div>
     </header>
 
     <main class="layout">
-      <section class="globe-panel">
+      <section class="globe-panel scroll-reveal">
         <div id="globe"></div>
         <div class="globe-overlay">
-          <div class="chip pill" id="last-update">Atualizando...</div>
-          <div class="chip pill" id="signal">Sinal: estabilizando</div>
+          <div class="chip pill" id="last-update" data-i18n="updating">Atualizando...</div>
+          <div class="chip pill" id="signal" data-i18n="signalStabilizing">Sinal: estabilizando</div>
         </div>
       </section>
 
       <section class="data-panel">
-        <div class="card">
-          <h2>Telemetria em tempo real</h2>
+        <div class="card scroll-reveal">
+          <h2 data-i18n="telemetry">Telemetria em tempo real</h2>
           <div class="stats">
             <div>
-              <span class="label">Latitude</span>
+              <span class="label" data-i18n="latitude">Latitude</span>
               <strong class="stat-value" id="lat">--</strong>
             </div>
             <div>
-              <span class="label">Longitude</span>
+              <span class="label" data-i18n="longitude">Longitude</span>
               <strong class="stat-value" id="lon">--</strong>
             </div>
             <div>
-              <span class="label">Altitude</span>
+              <span class="label" data-i18n="altitude">Altitude</span>
               <strong class="stat-value" id="alt">--</strong>
             </div>
             <div>
-              <span class="label">Velocidade</span>
+              <span class="label" data-i18n="velocity">Velocidade</span>
               <strong class="stat-value" id="vel">--</strong>
             </div>
           </div>
         </div>
 
-        <div class="card">
-          <h2>Proximas passagens visiveis</h2>
-          <p class="muted">
+        <div class="card scroll-reveal">
+          <h2 data-i18n="passes">Proximas passagens visiveis</h2>
+          <p class="muted" data-i18n="passesHint">
             Permita geolocalizacao para calcular visibilidade. Usamos Open Notify +
             Sunrise-Sunset.
           </p>
           <ol class="passes" id="passes">
-            <li>Carregando previsoes...</li>
+            <li data-i18n="loadingPasses">Carregando previsoes...</li>
           </ol>
         </div>
 
-        <div class="card">
-          <h2>Controles</h2>
+        <div class="card scroll-reveal">
+          <h2 data-i18n="controls">Controles</h2>
           <div class="controls">
-            <button id="follow" class="btn btn-primary">Seguir ISS</button>
-            <button id="free" class="btn btn-ghost">Explorar globo</button>
-            <button id="refresh" class="btn btn-glass">Atualizar agora</button>
+            <button id="follow" class="btn btn-primary" data-i18n="follow">Seguir ISS</button>
+            <button id="free" class="btn btn-ghost" data-i18n="explore">Explorar globo</button>
+            <button id="refresh" class="btn btn-glass" data-i18n="refresh">Atualizar agora</button>
           </div>
           <div class="toggle">
             <label>
               <input type="checkbox" id="trail" checked />
-              Mostrar trilha orbital
+              <span data-i18n="trail">Mostrar trilha orbital</span>
             </label>
             <label>
               <input type="checkbox" id="atmosphere" checked />
-              Brilho atmosferico
+              <span data-i18n="atmosphere">Brilho atmosferico</span>
             </label>
           </div>
         </div>
@@ -94,11 +104,11 @@
     </main>
 
     <footer class="footer">
-      Dados:
+      <span data-i18n="footerData">Dados:</span>
       <a class="link" href="https://open-notify.org/" target="_blank" rel="noreferrer">Open Notify</a>
-      | Visualizacao:
+      <span data-i18n="footerViz">| Visualizacao:</span>
       <a class="link" href="https://globe.gl/" target="_blank" rel="noreferrer">Globe.gl + Three.js</a>
-      | Inspiracao:
+      <span data-i18n="footerInspiration">| Inspiracao:</span>
       <a class="link" href="https://www.nasa.gov/" target="_blank" rel="noreferrer">NASA</a>
     </footer>
 
