@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rastreador ISS • Tempo Real</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="background">
+      <div class="nebula"></div>
+      <div class="grid"></div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">ISS</span>
+        <div>
+          <h1>Rastreador da Estacao Espacial</h1>
+          <p>Posicao, velocidade e proximas passagens visiveis.</p>
+        </div>
+      </div>
+      <div class="status pill" id="status">Conectando aos satelites...</div>
+    </header>
+
+    <main class="layout">
+      <section class="globe-panel">
+        <div id="globe"></div>
+        <div class="globe-overlay">
+          <div class="chip pill" id="last-update">Atualizando...</div>
+          <div class="chip pill" id="signal">Sinal: estabilizando</div>
+        </div>
+      </section>
+
+      <section class="data-panel">
+        <div class="card">
+          <h2>Telemetria em tempo real</h2>
+          <div class="stats">
+            <div>
+              <span class="label">Latitude</span>
+              <strong class="stat-value" id="lat">--</strong>
+            </div>
+            <div>
+              <span class="label">Longitude</span>
+              <strong class="stat-value" id="lon">--</strong>
+            </div>
+            <div>
+              <span class="label">Altitude</span>
+              <strong class="stat-value" id="alt">--</strong>
+            </div>
+            <div>
+              <span class="label">Velocidade</span>
+              <strong class="stat-value" id="vel">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Proximas passagens visiveis</h2>
+          <p class="muted">
+            Permita geolocalizacao para calcular visibilidade. Usamos Open Notify +
+            Sunrise-Sunset.
+          </p>
+          <ol class="passes" id="passes">
+            <li>Carregando previsoes...</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>Controles</h2>
+          <div class="controls">
+            <button id="follow" class="btn btn-primary">Seguir ISS</button>
+            <button id="free" class="btn btn-ghost">Explorar globo</button>
+            <button id="refresh" class="btn btn-glass">Atualizar agora</button>
+          </div>
+          <div class="toggle">
+            <label>
+              <input type="checkbox" id="trail" checked />
+              Mostrar trilha orbital
+            </label>
+            <label>
+              <input type="checkbox" id="atmosphere" checked />
+              Brilho atmosferico
+            </label>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      Dados:
+      <a class="link" href="https://open-notify.org/" target="_blank" rel="noreferrer">Open Notify</a>
+      | Visualizacao:
+      <a class="link" href="https://globe.gl/" target="_blank" rel="noreferrer">Globe.gl + Three.js</a>
+      | Inspiracao:
+      <a class="link" href="https://www.nasa.gov/" target="_blank" rel="noreferrer">NASA</a>
+    </footer>
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/globe.gl@2.32.1/dist/globe.gl.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
