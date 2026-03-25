@@ -16,10 +16,119 @@ const elements = {
   refresh: document.getElementById("refresh"),
   trail: document.getElementById("trail"),
   atmosphere: document.getElementById("atmosphere"),
-  cursorMain: document.getElementById("cursor-main"),
-  cursorTrail: document.querySelector(".cursor-trail"),
-  dotsGrid: document.querySelector(".dots-grid"),
+  langButtons: Array.from(document.querySelectorAll(".lang-btn")),
 };
+
+const translations = {
+  pt: {
+    title: "ISS Tracker",
+    subtitle: "Telemetria orbital, trilhas visuais e passagens em tempo real.",
+    statusConnecting: "Conectando aos satelites...",
+    updating: "Atualizando...",
+    signalStabilizing: "Sinal: estabilizando",
+    telemetry: "Telemetria em tempo real",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    altitude: "Altitude",
+    velocity: "Velocidade",
+    passes: "Proximas passagens visiveis",
+    passesHint: "Permita geolocalizacao para calcular visibilidade. Usamos Open Notify + Sunrise-Sunset.",
+    loadingPasses: "Carregando previsoes...",
+    controls: "Controles",
+    follow: "Seguir ISS",
+    explore: "Explorar globo",
+    refresh: "Atualizar agora",
+    trail: "Mostrar trilha orbital",
+    atmosphere: "Brilho atmosferico",
+    footerData: "Dados:",
+    footerViz: "| Visualizacao:",
+    footerInspiration: "| Inspiracao:",
+    signalSync: "Sinal: sincronizando",
+    signalStable: "Sinal: estavel",
+    signalUnstable: "Sinal: instavel",
+    statusActive: "Transmissao ativa",
+    statusError: "Erro na comunicacao",
+    updated: "Atualizado",
+    passVisible: "Visivel",
+    passLow: "Pouco visivel",
+    passUnavailable: "Nenhuma previsao disponivel.",
+    passError: "Erro ao calcular passagens.",
+    geoDenied: "Permissao de localizacao negada.",
+    geoUnsupported: "Navegador sem suporte a geolocalizacao.",
+    minutes: "min",
+  },
+  en: {
+    title: "ISS Tracker",
+    subtitle: "Orbital telemetry, visual trails, and passes in real time.",
+    statusConnecting: "Connecting to satellites...",
+    updating: "Updating...",
+    signalStabilizing: "Signal: stabilizing",
+    telemetry: "Real-time telemetry",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    altitude: "Altitude",
+    velocity: "Velocity",
+    passes: "Upcoming visible passes",
+    passesHint: "Allow geolocation to estimate visibility. We use Open Notify + Sunrise-Sunset.",
+    loadingPasses: "Loading passes...",
+    controls: "Controls",
+    follow: "Follow ISS",
+    explore: "Explore globe",
+    refresh: "Refresh now",
+    trail: "Show orbital trail",
+    atmosphere: "Atmospheric glow",
+    footerData: "Data:",
+    footerViz: "| Visualization:",
+    footerInspiration: "| Inspiration:",
+    signalSync: "Signal: syncing",
+    signalStable: "Signal: stable",
+    signalUnstable: "Signal: unstable",
+    statusActive: "Live transmission",
+    statusError: "Communication error",
+    updated: "Updated",
+    passVisible: "Visible",
+    passLow: "Low visibility",
+    passUnavailable: "No forecast available.",
+    passError: "Error while calculating passes.",
+    geoDenied: "Location permission denied.",
+    geoUnsupported: "Browser without geolocation support.",
+    minutes: "min",
+  },
+};
+
+let currentLang = "pt";
+
+function t(key) {
+  return translations[currentLang][key] || key;
+}
+
+function applyTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    if (key) el.textContent = t(key);
+  });
+
+  if (lastPassItems.length) {
+    renderPasses(lastPassItems);
+  }
+
+  if (lastSample) {
+    const updated = new Date(lastSample.timestamp);
+    elements.lastUpdate.textContent = `${t("updated")} ${updated.toLocaleTimeString(
+      currentLang === "pt" ? "pt-BR" : "en-US"
+    )}`;
+  }
+}
+
+function setLanguage(lang) {
+  if (!translations[lang]) return;
+  currentLang = lang;
+  document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+  applyTranslations();
+  elements.langButtons.forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.lang === lang);
+  });
+}
 
 const globeContainer = document.getElementById("globe");
 const globe = Globe()(globeContainer)
@@ -42,13 +151,24 @@ const issMarker = {
   color: "#4de2b3",
 };
 
+globe
+  .htmlElementsData([issMarker])
+  .htmlLat((d) => d.lat)
+  .htmlLng((d) => d.lng)
+  .htmlElement(() => {
+    const el = document.createElement("div");
+    el.className = "iss-icon";
+    return el;
+  });
+
 let history = [];
 let followIss = true;
 let lastSample = null;
 let velocity = 0;
+let lastPassItems = [];
 
 function setStatus(message, danger = false) {
-  elements.status.textContent = message;
+  elements.status.textContent = t(message) || message;
   elements.status.style.color = danger ? "#ff6b6b" : "#4de2b3";
 }
 
@@ -64,7 +184,8 @@ function updateOrbitTrail(lat, lng) {
   if (history.length > 90) history.shift();
 
   globe
-    .pathColor(() => ["rgba(77, 227, 180, 0.6)"])
+    .pathColor(() => ["rgba(94, 241, 255, 0.85)"])
+    .pathStroke(1.8)
     .pathDashLength(0.2)
     .pathDashGap(0.08)
     .pathDashAnimateTime(3000)
@@ -79,11 +200,7 @@ function setMarker(lat, lng) {
   issMarker.lat = lat;
   issMarker.lng = lng;
 
-  globe
-    .pointsData([issMarker])
-    .pointAltitude(() => 0.02)
-    .pointRadius("size")
-    .pointColor("color");
+  globe.htmlElementsData([issMarker]);
 
   if (followIss) {
     globe.pointOfView({ lat, lng, altitude: 1.8 }, 900);
@@ -138,12 +255,16 @@ async function fetchIssPosition() {
 
   if (elements.trail.checked) {
     updateOrbitTrail(sample.latitude, sample.longitude);
+  } else {
+    globe.pathsData([]);
   }
 
   const updated = new Date(timestamp);
-  elements.lastUpdate.textContent = `Atualizado ${updated.toLocaleTimeString("pt-BR")}`;
-  elements.signal.textContent = "Sinal: estavel";
-  setStatus("Transmissao ativa");
+  elements.lastUpdate.textContent = `${t("updated")} ${updated.toLocaleTimeString(
+    currentLang === "pt" ? "pt-BR" : "en-US"
+  )}`;
+  elements.signal.textContent = t("signalStable");
+  setStatus("statusActive");
 }
 
 async function fetchPasses(lat, lng) {
@@ -170,22 +291,24 @@ async function fetchPasses(lat, lng) {
   });
 
   renderPasses(items);
+  lastPassItems = items;
 }
 
 function renderPasses(items) {
   elements.passes.innerHTML = "";
 
   if (!items.length) {
-    elements.passes.innerHTML = "<li>Nenhuma previsao disponivel.</li>";
+    elements.passes.innerHTML = `<li>${t("passUnavailable")}</li>`;
     return;
   }
 
   items.forEach((pass) => {
     const li = document.createElement("li");
-    const label = pass.isNight ? "Visivel" : "Pouco visivel";
+    const label = pass.isNight ? t("passVisible") : t("passLow");
+    const locale = currentLang === "pt" ? "pt-BR" : "en-US";
     li.innerHTML = `
-      <span class="pass-time">${pass.risetime.toLocaleString("pt-BR")}</span>
-      <span class="pass-meta">${pass.duration} min</span>
+      <span class="pass-time">${pass.risetime.toLocaleString(locale)}</span>
+      <span class="pass-meta">${pass.duration} ${t("minutes")}</span>
       <span class="pass-tag ${pass.isNight ? "good" : "warn"}">${label}</span>
     `;
     elements.passes.appendChild(li);
@@ -194,12 +317,12 @@ function renderPasses(items) {
 
 async function updateAll() {
   try {
-    elements.signal.textContent = "Sinal: sincronizando";
+    elements.signal.textContent = t("signalSync");
     await fetchIssPosition();
   } catch (error) {
     console.error(error);
-    setStatus("Erro na comunicacao", true);
-    elements.signal.textContent = "Sinal: instavel";
+    setStatus("statusError", true);
+    elements.signal.textContent = t("signalUnstable");
   }
 }
 
@@ -222,6 +345,8 @@ function setupControls() {
     if (!elements.trail.checked) {
       history = [];
       globe.pathsData([]);
+    } else if (lastSample) {
+      updateOrbitTrail(lastSample.latitude, lastSample.longitude);
     }
   });
 
@@ -252,28 +377,6 @@ function initStarfield() {
   globe.scene().add(stars);
 }
 
-function setupCursor() {
-  if (!elements.cursorMain || !elements.cursorTrail) return;
-
-  document.body.style.cursor = "none";
-  document.addEventListener("mousemove", (event) => {
-    const x = `${event.clientX}px`;
-    const y = `${event.clientY}px`;
-    elements.cursorMain.style.left = x;
-    elements.cursorMain.style.top = y;
-    elements.cursorTrail.style.left = x;
-    elements.cursorTrail.style.top = y;
-
-    if (elements.dotsGrid) {
-      elements.dotsGrid.style.setProperty("--mx", `${event.clientX}px`);
-      elements.dotsGrid.style.setProperty("--my", `${event.clientY}px`);
-    }
-
-    document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
-    document.documentElement.style.setProperty("--mouse-y", `${event.clientY}px`);
-  });
-}
-
 function setupReveal() {
   const targets = document.querySelectorAll(".scroll-reveal");
   if (!targets.length) return;
@@ -298,8 +401,16 @@ function setupReveal() {
 function init() {
   initStarfield();
   setupControls();
-  setupCursor();
   setupReveal();
+  const savedLang = localStorage.getItem("iss-lang");
+  setLanguage(savedLang || "pt");
+  elements.langButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const lang = btn.dataset.lang;
+      setLanguage(lang);
+      localStorage.setItem("iss-lang", lang);
+    });
+  });
   updateAll();
   setInterval(updateAll, 5000);
 
@@ -307,15 +418,15 @@ function init() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         fetchPasses(pos.coords.latitude, pos.coords.longitude).catch(() => {
-          elements.passes.innerHTML = "<li>Erro ao calcular passagens.</li>";
+          elements.passes.innerHTML = `<li>${t("passError")}</li>`;
         });
       },
       () => {
-        elements.passes.innerHTML = "<li>Permissao de localizacao negada.</li>";
+        elements.passes.innerHTML = `<li>${t("geoDenied")}</li>`;
       }
     );
   } else {
-    elements.passes.innerHTML = "<li>Navegador sem suporte a geolocalizacao.</li>";
+    elements.passes.innerHTML = `<li>${t("geoUnsupported")}</li>`;
   }
 }
 
