@@ -1,5 +1,7 @@
 # ISS Tracker
 
+[Read in Portuguese](README-pt-br.md)
+
 <p align="center">
 	<img src="assets/ImagemISSTracker.png" alt="ISS Tracker preview" width="900" />
 </p>
